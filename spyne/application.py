@@ -90,10 +90,12 @@ class Application(object):
     transport = None
 
     def __init__(self, services, tns, name=None,
-                          in_protocol=None, out_protocol=None, interface=None):
+                          in_protocol=None, out_protocol=None, interface=None,
+                          exception_detail=False):
         self.services = tuple(services)
         self.tns = tns
         self.name = name
+        self.exception_detail = exception_detail
 
         if self.name is None:
             self.name = self.__class__.__name__.split('.')[-1]
@@ -171,7 +173,8 @@ class Application(object):
         except Exception as e:
             logger.exception(e)
 
-            ctx.out_error = Fault('Server', get_fault_string_from_exception(e))
+            ctx.out_error = Fault('Server',
+                                  self.get_fault_string_from_exception(e))
 
             # fire events
             self.event_manager.fire_event('method_exception_object', ctx)
@@ -255,3 +258,9 @@ class Application(object):
 
     def __hash__(self):
         return hash(tuple((id(s) for s in self.services)))
+
+    def get_fault_string_from_exception(self, e):
+        if self.exception_detail:
+            return unicode(e)
+
+        return get_fault_string_from_exception(e)
