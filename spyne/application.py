@@ -261,6 +261,6 @@ class Application(object):
 
     def get_fault_string_from_exception(self, e):
         if self.exception_detail:
-            return unicode(e)
+            return unicode(e).encode('ascii', 'xmlcharrefreplace')
 
         return get_fault_string_from_exception(e)
